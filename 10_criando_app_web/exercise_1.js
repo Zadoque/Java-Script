@@ -5,6 +5,11 @@ const addToDisplay = num => {
             num = '(';
         }
         if(num ==='b'){
+            if(display.textContent[display.textContent.length - 1] === '('){
+                console.log('abriu e fechou sem nada dentro');
+                return;
+            }
+
             num = ')';
         }
         if( num === '.'){
@@ -53,43 +58,98 @@ function getInfo(str, index){
     return info;
 
 }
-function calculate(string){
-    let str = string;
+function calculate(str){
     do{
         if(str.includes('(')){
-            let index = str.search(/[*]/g);
-        }
-        else if(str.includes('*')){
-            let index = str.search(/[*]/g);
-            let info = getInfo(str, index);
-            str = `${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
-            console.log(str);
-        }
-        else if(str.includes('/')){
-            let index = str.search(/[\/]/g);
-            let info = getInfo(str, index);
-            str = `${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
-            console.log(str);
-        }
-        else if(str.includes('+')){
-            let index = str.search(/[+]/g);
-            if( index == 0){ 
-                index = str.slice(1, str.length).search(/[+]/g) + 1;
+            let index_a = str.search(/[(]/g);
+            let index_b = str.search(/[)]/g);
+            if(str.slice(index_a + 1).includes('(')){
+                while(str.slice(index_a + 1).includes('(')){
+                    index_a = str.slice(index_a + 1).search(/[(]/g) + 1;
+                }
             }
-            let info = getInfo(str, index);
-            str = `${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end)}`;
-            console.log(str);
-        }
-        else if(str.includes('-')){
-            let index = str.search(/[\-]/g);
-            if( index == 0){ 
-                index = str.slice(1, str.length).search(/[\-]/g) + 1;
+            if(/[0-9]/g.test(str[index_a - 1])){
+                str = `${str.slice(0, index_a)}*${str.slice(index_a)}`;
+                console.log('here');
+                index_a++;
+                index_b++;
             }
-            let info = getInfo(str, index);
-            str = `${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end)}`;
+            let result = `${calculate(str.slice(index_a + 1, index_b))}`
+            if(str[index_a - 1] === '-'){
+                result = `${Number(result) * (-1)}`;
+                index_a--;
+            }
+            if(str[index_a - 1] === '+'){
+                index_a--;
+            } 
+            
+            console.log(str[index_a - 1]);
+
+            str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
             console.log(str);
+            
+
         }
-    }while(/[\/+\-*]/g.test(str.slice(1, str.length - 1)));
+        else if(str.includes('*') || str.includes('/')){
+            if(str.includes('*') && str.includes('/')){
+                let index1 = str.search(/[*]/g);
+                let index2 = str.search(/[\/]/g);
+                if (index1 > index2){
+                    let info = getInfo(str, index1);
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                    console.log(str);
+                }
+                else{
+                    let info = getInfo(str, index2);
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                    console.log(str);
+                }
+            }
+            else if(str.includes('*')){
+                let index1 = str.search(/[*]/g);
+                let info = getInfo(str, index1);
+                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                console.log(str);
+            }
+            else{
+                let index2 = str.search(/[\/]/g);
+                let info = getInfo(str, index2);
+                str = `${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                console.log(str);
+            }
+            
+        }
+        else if( (str.includes('+')) || (str.includes('-')) ){
+            if(str.includes('+') && str.includes('-')){
+                let index1 = str.slice(1).search(/[+]/g);
+                let index2 = str.slice(1).search(/[\-]/g);
+                if (index1 > index2){
+                    let info = getInfo(str, index1);
+                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
+                    console.log(str);
+                }
+                else{
+                    let info = getInfo(str, index2);
+                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
+                    console.log(str);
+                }
+            }
+            else if(str.includes('+')){
+                let index1 = str.search(/[+]/g);
+                let info = getInfo(str, index1);
+                str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
+                console.log(str);
+            }
+            else{
+                let index2 = str.search(/[\-]/g);
+                let info = getInfo(str, index2);
+                str = `${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
+                console.log(str);
+            }
+        }
+            
+              
+    }while(/[\/+\-*]/g.test(str.slice(1)));
     return str;
 }
 
@@ -98,7 +158,7 @@ document.querySelector('#buttons').addEventListener('click', event => {
     let char = event.target.id;
     if(event.target.classList.contains('num')){
         if (char === 'b'){
-            if(str.match(/[)]/g).length === (str.match(/[(]/g).length - 1)){
+            if(str.match(/[(]/g)){
                 addToDisplay(char);
             }
         }
@@ -125,10 +185,21 @@ document.querySelector('#buttons').addEventListener('click', event => {
             display.textContent = str.slice(0, str.length - 1);
         }
         else{
-            if((/[+\-\/*]/g.test(str))  && !(/[+\-\/*(]/g.test(str[str.length - 1])) &&
-             ((str.match(/[(]/g).length) === (str.match(/[)]/g).length))){
-                console.log("Let's calculate");
-                display.textContent = calculate(str);
+            if((/[+\-\/*]/g.test(str))  && !(/[+\-\/*(]/g.test(str[str.length - 1]))){
+                if(  (str.match(/[(]/g) !== null)   &&   (str.match(/[)]/g) !== null )   ){
+                    if( str.match(/[(]/g).length  ===  str.match(/[)]/g).length   ){
+                        console.log("Let's calculate from here");
+                        display.textContent = calculate(str);
+                    }
+                }
+                else if(  (str.match(/[(]/g) == null)   &&   (str.match(/[)]/g) == null )   ){
+                    console.log("Let's calculate");
+                    display.textContent = calculate(str);
+                }
+                else{
+                    console.log('Nothing to do 1');
+                }
+                
             }
             else{
                 console.log('Nothing to do');
