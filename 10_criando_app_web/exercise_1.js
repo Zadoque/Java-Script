@@ -38,11 +38,17 @@ function getInfo(str, index){
         info.number2 += `${str[info.index_end]}`;
         info.index_end++;
     }
-    info.index_end--;
+    
     if(info.index_start == 1 && str[0] === '-'){
         info.number1 = `${Number(info.number1) * (-1)}`
-        info.string = str.slice(1, str.length - 1);
+        info.string = str.slice(1);
         info.index_end--;
+        info.index_start--;
+    }
+    if(info.index_start == 1 && str[0] === '+'){
+        info.string = str.slice(1);
+        info.index_end--;
+        info.index_start--;
     }
     return info;
 
@@ -67,8 +73,11 @@ function calculate(string){
         }
         else if(str.includes('+')){
             let index = str.search(/[+]/g);
+            if( index == 0){ 
+                index = str.slice(1, str.length).search(/[+]/g) + 1;
+            }
             let info = getInfo(str, index);
-            str = `${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end, str.length - 1)}`;
+            str = `${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end)}`;
             console.log(str);
         }
         else if(str.includes('-')){
@@ -77,7 +86,7 @@ function calculate(string){
                 index = str.slice(1, str.length).search(/[\-]/g) + 1;
             }
             let info = getInfo(str, index);
-            str = `${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end, str.length - 1)}`;
+            str = `${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end)}`;
             console.log(str);
         }
     }while(/[\/+\-*]/g.test(str.slice(1, str.length - 1)));
@@ -89,7 +98,7 @@ document.querySelector('#buttons').addEventListener('click', event => {
     let char = event.target.id;
     if(event.target.classList.contains('num')){
         if (char === 'b'){
-            if(str.includes('(')){
+            if(str.match(/[)]/g).length === (str.match(/[(]/g).length - 1)){
                 addToDisplay(char);
             }
         }
@@ -116,7 +125,8 @@ document.querySelector('#buttons').addEventListener('click', event => {
             display.textContent = str.slice(0, str.length - 1);
         }
         else{
-            if((/[+\-\/*]/g.test(str))  && !(/[+\-\/*(]/g.test(str[str.length - 1]))){
+            if((/[+\-\/*]/g.test(str))  && !(/[+\-\/*(]/g.test(str[str.length - 1])) &&
+             ((str.match(/[(]/g).length) === (str.match(/[)]/g).length))){
                 console.log("Let's calculate");
                 display.textContent = calculate(str);
             }
