@@ -1,9 +1,7 @@
-javascript
-function alterarValores(a, b) {
+function alterarValores(a, b){
   a = 50;
   b.prop = 'novo';
 }
- 
 let x = 10;
 let y = { prop: 'original' };
 alterarValores(x, y);
