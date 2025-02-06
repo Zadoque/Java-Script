@@ -20,6 +20,14 @@ const addToDisplay = num => {
         if((num === '/' || num === '*') && last_char == '('){
             return;
         }
+        if(((num === '*') || (num === '/')) && (display.textContent == '0')){
+            display.textContent += num;
+            return;
+        }
+        if(((num === '*') || (num === '/')) && (display.textContent == '')){
+            return;
+        }
+
         if( num === '.'){
             display.textContent += num;
         }
@@ -84,31 +92,27 @@ function calculate(str){
         if(str.includes('(')){
             let index_a = str.search(/[(]/g);
             let index_b = str.search(/[)]/g);
-            let acc = 0;
-            let str1 = str;
             let nextindex = str.length - str.slice(index_a + 1).length;
             let nextopen = str.slice(index_a + 1).search(/[(]/g);
             let bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
-            if((str1.slice(index_a + 1).includes('(')) && bool){
-                while(str1.includes('(')){
-                    index_a = str1.search(/[(]/g);
-                    str1 = `${str1.slice(0, index_a)}${str1.slice(index_a + 1)}`;
-                    index_a += acc;
-                    acc++;
-                }
-                if(index_b < index_a){
-                    index_b = str.slice(index_b + 1).search(/[)]/g);
-                    index_b += index_a - 1;
-                }
+            while( bool){
+                index_a = nextindex + nextopen;
+                nextindex = str.length - str.slice(index_a + 1).length;
+                nextopen = str.slice(index_a + 1).search(/[(]/g);
+                bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
+                
             }
-
+            if(index_b < index_a){
+                index_b = str.slice(index_b + 1).search(/[)]/g);
+                index_b += index_a - 1;
+            }
             if(/[0-9)]/g.test(str[index_a - 1])){
                 str = `${str.slice(0, index_a)}*${str.slice(index_a)}`;
                 index_a++;
                 index_b++;
             }
-            
-            let result = `${calculate(str.slice(index_a + 1, index_b))}`
+            let strC = str.slice(index_a + 1, index_b);
+            let result = `${calculate(strC)}`;
            
             if(str[index_a - 1] === '-' && result !== '0'){
                 result = `${Number(result) * (-1)}`;
@@ -140,22 +144,22 @@ function calculate(str){
             if(str.includes('*') && str.includes('/')){
                 let index1 = str.search(/[*]/g);
                 let index2 = str.search(/[\/]/g);
-                if (index1 > index2){
+                if (index1 < index2){
                     let info = getInfo(str, index1);
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end)}`;
                 }
                 else{
                     let info = getInfo(str, index2);
                     if(info.number2 == '0'){
                         return 'Dividir por zero é crime';
                     }
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
                 }
             }
             else if(str.includes('*')){
                 let index1 = str.search(/[*]/g);
                 let info = getInfo(str, index1);
-                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
             }
             else{
                 let index2 = str.search(/[\/]/g);
@@ -163,7 +167,7 @@ function calculate(str){
                 if(info.number2 == '0'){
                     return 'Dividir por zero é crime';
                 }
-                str = `${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end, str.length - 1)}`;
+                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
             }
             
         }
