@@ -60,13 +60,10 @@ function getInfo(str, index){
         }
         info.index_start++;
     }
-    
-    
     while( /[0-9\.]/g.test(str[info.index_end])){
         info.number2 += `${str[info.index_end]}`;
         info.index_end++;
     }
-    
     if((info.index_start == 1 && str[0] === '-') || (str[info.index_start - 1] === '-' && str[info.index_start - 2] === '(' )){
         info.number1 = `${Number(info.number1) * (-1)}`
         if(info.index_start === 1){
@@ -74,7 +71,6 @@ function getInfo(str, index){
         }
         else{
             info.string = `${str.slice(0,info.index_start - 1)}${str.slice(info.index_start)}`;
-            
         }
         info.index_end--;
         info.index_start--;
@@ -118,7 +114,6 @@ function calculate(str){
                 }
                 str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
             }
-            
         }
         else if( (str.slice(1).includes('+')) || (str.slice(1).includes('-')) ){
             if(/.*(\++|\-+).*(\++|\-+).+/.test(str)){
@@ -126,13 +121,11 @@ function calculate(str){
                 let index2 = str.slice(1).search(/[\-]/g) + 1;
                 if (index1 < index2){
                     let info = getInfo(str, index1);
-                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
-                    
+                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`; 
                 }
                 else{
                     let info = getInfo(str, index2);
                     str = `${info.string.slice(0, info.index_start)}${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
-                    
                 }
             }
             else if(str.slice(1).includes('+')){
@@ -148,8 +141,6 @@ function calculate(str){
                 
             }
         }
-            
-              
     }while(/[\/+\-*)]/g.test(str.slice(1)));
     return str;
 }
@@ -186,7 +177,6 @@ function simplify(str){
                     result = `${(Number(info.number1)  / Number(result) ).toFixed(2)}`;
                 }
                 str = `${info.string.slice(0, info.index_start)}${result}${str.slice(index_b + 1)}`
-
             }
             else{
                 str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
@@ -209,12 +199,10 @@ document.querySelector('#buttons').addEventListener('click', event => {
         else{
             addToDisplay(char);
         }
-        
-        
     }
     else if(event.target.classList.contains('op')){
         if (/[+\-\/*]/g.test(str[str.length - 1])){
-           messageDisplay(`Separe ${char} e ${srt[str.length - 1]}`,200);
+           messageDisplay(`Separe ${char} e ${str[str.length - 1]}`,900);
             
         }
         else{
