@@ -45,6 +45,7 @@ const addToDisplay = num => {
         }, 1500);
     }
 };
+
 function getInfo(str, index){
     let info = {
         index_start: index - 1,
@@ -89,58 +90,7 @@ function getInfo(str, index){
 }
 function calculate(str){
     do{
-        if(str.includes('(')){
-            let index_a = str.search(/[(]/g);
-            let index_b = str.search(/[)]/g);
-            let nextindex = str.length - str.slice(index_a + 1).length;
-            let nextopen = str.slice(index_a + 1).search(/[(]/g);
-            let bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
-            while( bool){
-                index_a = nextindex + nextopen;
-                nextindex = str.length - str.slice(index_a + 1).length;
-                nextopen = str.slice(index_a + 1).search(/[(]/g);
-                bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
-                
-            }
-            if(index_b < index_a){
-                index_b = str.slice(index_b + 1).search(/[)]/g);
-                index_b += index_a - 1;
-            }
-            if(/[0-9)]/g.test(str[index_a - 1])){
-                str = `${str.slice(0, index_a)}*${str.slice(index_a)}`;
-                index_a++;
-                index_b++;
-            }
-            let strC = str.slice(index_a + 1, index_b);
-            let result = `${calculate(strC)}`;
-           
-            if(str[index_a - 1] === '-' && result !== '0'){
-                result = `${Number(result) * (-1)}`;
-                index_a--;
-            }
-            if(str[index_a - 1] === '+'){
-                index_a--;
-            } 
-            if((str[index_a - 1] === '*' || str[index_a - 1] === '/' ) && Number(result) < 0){
-                let new_str = `${str.slice(0, index_a)}${result.slice(1)}`;
-                let info = getInfo(new_str, index_a - 1);
-                if(str[index_a - 1] === '*'){
-                    result = `${(Number(result) * Number(info.number1)).toFixed(2)}`;
-                }
-                else{
-                    if(result == '0'){
-                        return 'Dividir por zero é crime';
-                    }
-                    result = `${(Number(info.number1)  / Number(result) ).toFixed(2)}`;
-                }
-                str = `${info.string.slice(0, info.index_start)}${result}${str.slice(index_b + 1)}`
-
-            }
-            else{
-                str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
-            }
-        }
-        else if(str.includes('*') || str.includes('/')){
+        if(str.includes('*') || str.includes('/')){
             if(str.includes('*') && str.includes('/')){
                 let index1 = str.search(/[*]/g);
                 let index2 = str.search(/[\/]/g);
@@ -203,6 +153,63 @@ function calculate(str){
               
     }while(/[\/+\-*)]/g.test(str.slice(1)));
     return str;
+}
+
+function simplify(str){
+    let parentheses_regex = /(\((\-?|\+?)[0-9]+((\.[0-9]+)?[\-\+*\/]?[0-9]+(\.[0-9]+)?)?\))/;
+    if(parentheses_regex.test(str)){
+        let parentheses_str = str.match(parentheses_regex);
+        let index_a = str.search(/[(]/g);
+        let index_b = str.search(/[)]/g);
+        let nextindex = str.length - str.slice(index_a + 1).length;
+        let nextopen = str.slice(index_a + 1).search(/[(]/g);
+        let bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
+        while( bool){
+            index_a = nextindex + nextopen;
+            nextindex = str.length - str.slice(index_a + 1).length;
+            nextopen = str.slice(index_a + 1).search(/[(]/g);
+            bool = ((( nextopen + nextindex ) < index_b) && nextopen !== -1);
+            
+        }
+        if(index_b < index_a){
+            index_b = str.slice(index_b + 1).search(/[)]/g);
+            index_b += index_a - 1;
+        }
+        if(/[0-9)]/g.test(str[index_a - 1])){
+            str = `${str.slice(0, index_a)}*${str.slice(index_a)}`;
+            index_a++;
+            index_b++;
+        }
+        let strC = str.slice(index_a + 1, index_b);
+        let result = `${calculate(strC)}`;
+       
+        if(str[index_a - 1] === '-' && result !== '0'){
+            result = `${Number(result) * (-1)}`;
+            index_a--;
+        }
+        if(str[index_a - 1] === '+'){
+            index_a--;
+        } 
+        if((str[index_a - 1] === '*' || str[index_a - 1] === '/' ) && Number(result) < 0){
+            let new_str = `${str.slice(0, index_a)}${result.slice(1)}`;
+            let info = getInfo(new_str, index_a - 1);
+            if(str[index_a - 1] === '*'){
+                result = `${(Number(result) * Number(info.number1)).toFixed(2)}`;
+            }
+            else{
+                if(result == '0'){
+                    return 'Dividir por zero é crime';
+                }
+                result = `${(Number(info.number1)  / Number(result) ).toFixed(2)}`;
+            }
+            str = `${info.string.slice(0, info.index_start)}${result}${str.slice(index_b + 1)}`
+
+        }
+        else{
+            str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
+        }
+    }
+
 }
 
 document.querySelector('#buttons').addEventListener('click', event => {
