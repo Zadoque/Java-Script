@@ -243,9 +243,7 @@ document.querySelector('#buttons').addEventListener('click', event => {
                     messageDisplay('Calculando',100);
                 }
                 else{
-                    let result = calculate(simplify(str));
-                    display.textContent = result;
-                    messageDisplay('Calculando',100);
+                    messageDisplay('Syntax Incorrect, try again',300);
                 } 
             }
             else{
