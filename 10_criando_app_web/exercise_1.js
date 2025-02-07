@@ -6,7 +6,7 @@ function messageDisplay(message, delay){
         display.textContent = text;
     }, delay);
 }
-const addToDisplay = (num,add_or_put = true) => {
+const addToDisplay = (num, add_or_put = true) => {
     if(add_or_put){
         display.textContent += num;
     }
@@ -14,6 +14,12 @@ const addToDisplay = (num,add_or_put = true) => {
         display.textContent = num;
     }
 };
+
+function setOrConcat(num, current_input){
+    current_input === '0' ?
+    addToDisplay(num, false):
+    addToDisplay(num);
+}
 
 function getInfo(str, index){
     let info = {
@@ -176,44 +182,49 @@ function verifyInput(str){
         return false;
     }
 }
-function handleNumInput(num, current_input){
-    if(current_input >= 18){
-        messageDisplay('Tamanho Máximo',500);
-        return;
-    }
+function canAddParetheses(num, current_input){
     let last_char = current_input[current_input.length - 1];
-    if(/[0-9]/.test(num)){
-        current_input === '0' ?
-        addToDisplay(num, false):
-        addToDisplay(num);
-        return;
-    }
-    if(/[0-9]/.test(last_char)&& num === '.'){
-        addToDisplay(num);
-        return;
-    }
-    if(!(/\./.test(last_char)) && num === 'a'){
-        num = '(';
-        current_input === '0' ?
-        addToDisplay(num, false):
-        addToDisplay(num);
-        return;
-    }
     if(num ==='b' && /\(/.test(current_input)){
-        num = ')';
         if(/\)/.test(current_input)){
             let bool = (current_input.match(/\(/g).length > current_input.match(/\)/g).length);
             if(bool){
-                addToDisplay(num);
+                return true;
             }
         }
         else{
             if(!(/[\-\+\*\/\(]/.test(last_char))){
-                addToDisplay(num);
+                return true;
             }
-            
         }
     }
+    return false;
+}
+
+function handleNumInput(num, current_input){
+    let last_char = current_input[current_input.length - 1];
+    if(current_input >= 18){
+        messageDisplay('Tamanho Máximo',500);
+        return;
+    }
+    if(/[0-9]/.test(num)){
+        setOrConcat( num, current_input);
+        return;
+    }
+    if(/[0-9]/.test(last_char) && num === '.' && !(/^.*[0-9]+\.[0-9]*$/.test(current_input))){
+        addToDisplay(num, c);
+        return;
+    }
+    if(!(/\./.test(last_char)) && num === 'a'){
+        num = '(';
+        setOrConcat(num, current_input);
+        return;
+    }
+    if(canAddParetheses(num, current_input)){
+        num = ')';
+        setOrConcat(num, current_input);
+        return;
+    }
+    messageDisplay('Syntax Error', 300);
 }
 function handleOpInput(op, current_input){
     let last_char = current_input[current_input.length - 1];
@@ -222,14 +233,15 @@ function handleOpInput(op, current_input){
      }
      else{
         if(/[\/\*]/.test(op)){
-            current_input === '0'?
-            messageDisplay('Comece com outra operação', 500):
-            addToDisplay(op);
+            if(current_input === '0' || current_input === ''){
+                messageDisplay('Comece com outra operação', 500);
+            }
+            else{
+                addToDisplay(op);
+            }
         }
         else{
-            current_input === '0'?
-            addToDisplay(op, false):
-            addToDisplay(op);
+            setOrConcat(op, current_input);
         }
      }
 }
@@ -245,7 +257,7 @@ function handleAction(action, str){
             addToDisplay(calculate(simplify(str)), false);
         }
         else{
-            messageDisplay('Syntax Incorrect, try again',300);
+            messageDisplay('Syntax Error',300);
         }
     }
 }
