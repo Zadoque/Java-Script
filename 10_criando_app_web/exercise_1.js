@@ -29,17 +29,16 @@ function getInfo(str, index){
         number2 : '',
         string: str,
     }
-    if(/[0-9\.]/g.test(str[info.index_start])){
-        while(/[0-9\.]/g.test(str[info.index_start])){
-            info.number1 = `${str[info.index_start]}${info.number1}`
-            info.index_start --;
-        }
-        info.index_start++;
+    
+    while(/[0-9\.]/g.test(str[info.index_start])){
+        info.number1 = `${str[info.index_start]}${info.number1}`
+        info.index_start --;
     }
     while( /[0-9\.]/g.test(str[info.index_end])){
         info.number2 += `${str[info.index_end]}`;
         info.index_end++;
     }
+    info.index_start++;
     info.index_end--;
     if((info.index_start == 1 && str[0] === '-') || (str[info.index_start - 1] === '-' && str[info.index_start - 2] === '(' )){
         info.number1 = `${Number(info.number1) * (-1)}`
