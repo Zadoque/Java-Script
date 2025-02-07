@@ -64,6 +64,7 @@ function getInfo(str, index){
         info.number2 += `${str[info.index_end]}`;
         info.index_end++;
     }
+    info.index_end--;
     if((info.index_start == 1 && str[0] === '-') || (str[info.index_start - 1] === '-' && str[info.index_start - 2] === '(' )){
         info.number1 = `${Number(info.number1) * (-1)}`
         if(info.index_start === 1){
@@ -87,7 +88,7 @@ function calculate(str){
     do{
         if(str.includes('*') || str.includes('/')){
             if(str.includes('*') && str.includes('/')){
-                let index1 = str.search(/[*]/g);
+                let index1 = str.search(/[\*]/g);
                 let index2 = str.search(/[\/]/g);
                 if (index1 < index2){
                     let info = getInfo(str, index1);
@@ -102,7 +103,7 @@ function calculate(str){
                 }
             }
             else if(str.includes('*')){
-                let index1 = str.search(/[*]/g);
+                let index1 = str.search(/[\*]/g);
                 let info = getInfo(str, index1);
                 str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
             }
@@ -115,9 +116,9 @@ function calculate(str){
                 str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
             }
         }
-        else if( (str.slice(1).includes('+')) || (str.slice(1).includes('-')) ){
-            if(/.*(\++|\-+).*(\++|\-+).+/.test(str)){
-                let index1 = str.slice(1).search(/[+]/g) + 1;
+        else if(/.*(\++|\-+).*(\++|\-+).+/.test(str)){
+            if(/(\-{1}.*\+{1}.*)|(\+{1}.*\-{1}.*)/.test(str)){
+                let index1 = str.slice(1).search(/[\+]/g) + 1;
                 let index2 = str.slice(1).search(/[\-]/g) + 1;
                 if (index1 < index2){
                     let info = getInfo(str, index1);
@@ -129,7 +130,7 @@ function calculate(str){
                 }
             }
             else if(str.slice(1).includes('+')){
-                let index1 = str.slice(1).search(/[+]/g) + 1;
+                let index1 = str.slice(1).search(/[\+]/g) + 1;
                 let info = getInfo(str, index1);
                 str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
                 
