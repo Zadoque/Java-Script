@@ -93,13 +93,11 @@ function calculate(str){
              result = (Number(info.number1) * Number(info.number2)).toFixed(2)
         }
         if(Number(info.number1) < 0 && result > 0){
-            console.log(str[index_end]);
             str = `${str.slice(0, index_start)}+${result}${str.slice(index_end + 1)}`;
         }
         else{
             str = `${str.slice(0, index_start)}${result}${str.slice(index_end + 1)}`;
         }
-        console.log(str);
     }
     while(plus_and_minus_regex.test(str)){
         let op_str = str.match(plus_and_minus_regex);
