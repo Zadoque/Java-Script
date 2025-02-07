@@ -6,42 +6,12 @@ function messageDisplay(message, delay){
         display.textContent = text;
     }, delay);
 }
-const addToDisplay = num => {
-    if(display.textContent.length < 15){
-        if(num === 'a'){
-            num = '(';
-        }
-        let last_char = display.textContent[display.textContent.length - 1];
-        if(num ==='b'){
-            if(last_char === '(' || last_char === '+' || last_char === '-' ){
-                messageDisplay('escreva mais antes de )', 500);
-                return;
-            }
-
-            num = ')';
-        }
-        if((num === '/' || num === '*') && last_char == '('){
-            return;
-        }
-        if(((num === '*') || (num === '/')) && (display.textContent == '0')){
-            display.textContent += num;
-            return;
-        }
-        if(((num === '*') || (num === '/')) && (display.textContent == '')){
-            return;
-        }
-
-        if( num === '.'){
-            display.textContent += num;
-        }
-        else{
-            display.textContent === '0' ?
-            display.textContent = num:
-            display.textContent += num;
-        }
+const addToDisplay = (num,add_or_put = true) => {
+    if(add_or_put){
+        display.textContent += num;
     }
     else{
-        messageDisplay('Tamanho Máximo',500);
+        display.textContent = num;
     }
 };
 
@@ -92,20 +62,20 @@ function calculate(str){
                 let index2 = str.search(/[\/]/g);
                 if (index1 < index2){
                     let info = getInfo(str, index1);
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end)}`;
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
                 }
                 else{
                     let info = getInfo(str, index2);
                     if(info.number2 == '0'){
                         return 'Dividir por zero é crime';
                     }
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
+                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
                 }
             }
             else if(str.includes('*')){
                 let index1 = str.search(/[\*]/g);
                 let info = getInfo(str, index1);
-                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
+                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
             }
             else{
                 let index2 = str.search(/[\/]/g);
@@ -113,11 +83,11 @@ function calculate(str){
                 if(info.number2 == '0'){
                     return 'Dividir por zero é crime';
                 }
-                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end )}`;
+                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
             }
         }
-        else if(/.*(\++|\-+).*(\++|\-+).+/.test(str)){
-            if(/(\-{1}.*\+{1}.*)|(\+{1}.*\-{1}.*)/.test(str)){
+        else if(/.*(\+?|\-?).*(\++|\-+).+/.test(str.slice(1))){
+            if(/(\-{1}.*\+{1}.*)|(\+{1}.*\-{1}.*)/.test(str.slice(1))){
                 let index1 = str.slice(1).search(/[\+]/g) + 1;
                 let index2 = str.slice(1).search(/[\-]/g) + 1;
                 if (index1 < index2){
@@ -187,57 +157,109 @@ function simplify(str){
     return str;
 
 }
+function verifyInput(str){
+    if((/[\+\-\/\*]/g.test(str))  && !(/[\+\-\/\*\(]/g.test(str[str.length - 1])) ){
+        if(  (str.match(/[\(]/g) !== null)   &&   (str.match(/[\)]/g) !== null )   ){
+            if( str.match(/[\(]/g)[0].length  ===  str.match(/[\)]/g)[0].length){
+                return true;
+            }
+            return false;
+        }
+        else if(  (str.match(/[\(]/g) == null)   &&   (str.match(/[\)]/g) == null )   ){
+            return true;
+        }
+        else{
+            return false;
+        } 
+    }
+    else{
+        return false;
+    }
+}
+function handleNumInput(num, current_input){
+    if(current_input >= 18){
+        messageDisplay('Tamanho Máximo',500);
+        return;
+    }
+    let last_char = current_input[current_input.length - 1];
+    if(/[0-9]/.test(num)){
+        current_input === '0' ?
+        addToDisplay(num, false):
+        addToDisplay(num);
+        return;
+    }
+    if(/[0-9]/.test(last_char)&& num === '.'){
+        addToDisplay(num);
+        return;
+    }
+    if(!(/\./.test(last_char)) && num === 'a'){
+        num = '(';
+        current_input === '0' ?
+        addToDisplay(num, false):
+        addToDisplay(num);
+        return;
+    }
+    if(num ==='b' && /\(/.test(current_input)){
+        num = ')';
+        if(/\)/.test(current_input)){
+            let bool = (current_input.match(/\(/g).length > current_input.match(/\)/g).length);
+            if(bool){
+                addToDisplay(num);
+            }
+        }
+        else{
+            if(!(/[\-\+\*\/\(]/.test(last_char))){
+                addToDisplay(num);
+            }
+            
+        }
+    }
+}
+function handleOpInput(op, current_input){
+    let last_char = current_input[current_input.length - 1];
+    if (/[\+\-\/\*]/g.test(last_char) ||( /[\(]/g.test(last_char) && /[\*\+]/.test(op) ) ){
+        messageDisplay(`Separe ${last_char} e ${op}`,900);
+     }
+     else{
+        if(/[\/\*]/.test(op)){
+            current_input === '0'?
+            messageDisplay('Comece com outra operação', 500):
+            addToDisplay(op);
+        }
+        else{
+            current_input === '0'?
+            addToDisplay(op, false):
+            addToDisplay(op);
+        }
+     }
+}
+function handleAction(action, str){
+    if(action === 'clear'){
+        display.textContent = '0';
+    }
+    else if (action === 'backspace' || action === 'backspace1'){
+        display.textContent = str.slice(0, str.length - 1);
+    }
+    else{
+        if(verifyInput(str)){
+            addToDisplay(calculate(simplify(str)), false);
+        }
+        else{
+            messageDisplay('Syntax Incorrect, try again',300);
+        }
+    }
+}
 
 document.querySelector('#buttons').addEventListener('click', event => {
     let str = display.textContent;
     let char = event.target.id;
     if(event.target.classList.contains('num')){
-        if (char === 'b'){
-            if(str.match(/[(]/g)){
-                addToDisplay(char);
-            }
-        }
-        else{
-            addToDisplay(char);
-        }
+        handleNumInput(char, str);
     }
     else if(event.target.classList.contains('op')){
-        if (/[+\-\/*]/g.test(str[str.length - 1])){
-           messageDisplay(`Separe ${char} e ${str[str.length - 1]}`,900);
-            
-        }
-        else{
-            addToDisplay(event.target.id);
-        }
+       handleOpInput(char, str);
     }
     else{
-        if(event.target.id === 'clear'){
-            display.textContent = '0';
-        }
-        else if (event.target.id === 'backspace' || event.target.id === 'backspace1'){
-            display.textContent = str.slice(0, str.length - 1);
-        }
-        else{
-            if((/[+\-\/*]/g.test(str))  && !(/[+\-\/*(]/g.test(str[str.length - 1])) || /^(?=.*\().*(?=.*\)).*$/g.test(str)){
-                if(  (str.match(/[(]/g) !== null)   &&   (str.match(/[)]/g) !== null )   ){
-                    if( str.match(/[(]/g)[0].length  ===  str.match(/[)]/g)[0].length){
-                        let result = calculate(simplify(str));
-                        display.textContent = result;
-                        messageDisplay('Calculando',100); 
-                    }
-                }
-                else if(  (str.match(/[(]/g) == null)   &&   (str.match(/[)]/g) == null )   ){
-                    let result = calculate(str);
-                    display.textContent = result;
-                    messageDisplay('Calculando',100);
-                }
-                else{
-                    messageDisplay('Syntax Incorrect, try again',300);
-                } 
-            }
-            else{
-                messageDisplay('Syntax Incorrect, try again',300);
-            }
-        }
+        handleAction(event.target.id,str);
     }
 });
