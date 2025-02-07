@@ -61,69 +61,77 @@ function getInfo(str, index){
 
 }
 function calculate(str){
-    do{
-        if(str.includes('*') || str.includes('/')){
-            if(str.includes('*') && str.includes('/')){
-                let index1 = str.search(/[\*]/g);
-                let index2 = str.search(/[\/]/g);
-                if (index1 < index2){
-                    let info = getInfo(str, index1);
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
-                }
-                else{
-                    let info = getInfo(str, index2);
-                    if(info.number2 == '0'){
-                        return 'Dividir por zero é crime';
-                    }
-                    str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
-                }
+    let times_and_division_regex = /[\+\-]?[0-9]+(\.[0-9]+)?[\*\/]{1}[\-\+]?[0-9]+(\.[0-9]+)?/;
+    let plus_and_minus_regex = /[\+\-]?[0-9]+(\.[0-9]+)?[\+\-]{1}[\-\+]?[0-9]+(\.[0-9]+)?/;
+    while(times_and_division_regex.test(str)){
+        let op_str = str.match(times_and_division_regex);
+        let bool = false;
+        let index = op_str[0].search(/[\*\/]/);
+        let index_start = op_str.index;
+        let index_end = op_str[0].length + index_start - 1;
+        if(/[\+\-]/.test(op_str[0][index + 1])){
+            if(op_str[0][index + 1] == '-'){
+                bool = true;
             }
-            else if(str.includes('*')){
-                let index1 = str.search(/[\*]/g);
-                let info = getInfo(str, index1);
-                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) * Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
+            op_str[0] = `${op_str[0].slice(0, index + 1)}${op_str[0].slice(index + 2)}`;
+        }
+        let info = getInfo(op_str[0], index);
+        index_start -= info.index_start;
+        if(bool){
+            info.number2 *= (-1);
+        }
+        let result = 0;
+        if(/[\/]/.test(op_str[0])){
+            if(Number(info.number2) == 0){
+                return 'Error! Divisão por 0';
             }
             else{
-                let index2 = str.search(/[\/]/g);
-                let info = getInfo(str, index2);
-                if(info.number2 == '0'){
-                    return 'Dividir por zero é crime';
-                }
-                str = `${info.string.slice(0, info.index_start)}${(Number(info.number1) / Number(info.number2)).toFixed(2)}${info.string.slice(info.index_end + 1)}`;
+                 result = (Number(info.number1) / Number(info.number2)).toFixed(2);
             }
         }
-        else if(/.*(\+?|\-?).*(\++|\-+).+/.test(str.slice(1))){
-            if(/(\-{1}.*\+{1}.*)|(\+{1}.*\-{1}.*)/.test(str.slice(1))){
-                let index1 = str.slice(1).search(/[\+]/g) + 1;
-                let index2 = str.slice(1).search(/[\-]/g) + 1;
-                if (index1 < index2){
-                    let info = getInfo(str, index1);
-                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`; 
-                }
-                else{
-                    let info = getInfo(str, index2);
-                    str = `${info.string.slice(0, info.index_start)}${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
-                }
-            }
-            else if(str.slice(1).includes('+')){
-                let index1 = str.slice(1).search(/[\+]/g) + 1;
-                let info = getInfo(str, index1);
-                str = `${info.string.slice(0, info.index_start)}${Number(info.number1) + Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
-                
-            }
-            else{
-                let index2 = str.slice(1).search(/[\-]/g) + 1;
-                let info = getInfo(str, index2);
-                str = `${Number(info.number1) - Number(info.number2)}${info.string.slice(info.index_end + 1)}`;
-                
-            }
+        else{
+             result = (Number(info.number1) * Number(info.number2)).toFixed(2)
         }
-    }while(/[\/+\-*)]/g.test(str.slice(1)));
+        if(Number(info.number1) < 0 && result > 0){
+            console.log(str[index_end]);
+            str = `${str.slice(0, index_start)}+${result}${str.slice(index_end + 1)}`;
+        }
+        else{
+            str = `${str.slice(0, index_start)}${result}${str.slice(index_end + 1)}`;
+        }
+        console.log(str);
+    }
+    while(plus_and_minus_regex.test(str)){
+        let op_str = str.match(plus_and_minus_regex);
+        let bool = false;
+        let index = op_str[0].slice(1).search(/[\+\-]/) + 1;
+        let index_start = op_str.index;
+        let index_end = op_str[0].length + index_start - 1;
+        if(/[\+\-]/.test(op_str[0][index + 1])){
+            if(op_str[0][index + 1] == '-'){
+                bool = true;
+            }
+            op_str[0] = `${op_str[0].slice(0, index + 1)}${op_str[0].slice(index + 2)}`;
+        }
+        let info = getInfo(op_str[0], index);
+        if(bool){
+            info.number2 *= (-1);
+        }
+
+        let result = 0;
+        if(/[\+]/.test(op_str[0].slice(1))){
+            result = Number(info.number1) + Number(info.number2);
+        }
+        else{
+             result = Number(info.number1) - Number(info.number2);
+        }
+        str = `${str.slice(0, index_start)}${result}${str.slice(index_end + 1)}`;
+    }
     return str;
 }
 
 function simplify(str){
-    let parentheses_regex = /(\(((\-?|\+?)[0-9]+((\.[0-9]+)?[\-\+*\/]?[0-9]+(\.[0-9]+)?)?)+\))/;
+    let parentheses_regex = /\(([\-+\*\/]{0,2}[0-9]+(\.[0-9]+)?)+\)/;
     do{
         if(parentheses_regex.test(str)){
             let parentheses_str = str.match(parentheses_regex);
@@ -141,23 +149,7 @@ function simplify(str){
                 }
                 index_a--;
             }
-            if( /[\/\*]/.test(str[index_a - 1]) && Number(result) < 0){
-                let new_str = `${str.slice(0, index_a)}${result.slice(1)}`;
-                let info = getInfo(new_str, index_a - 1);
-                if(str[index_a - 1] === '*'){
-                    result = `${(Number(result) * Number(info.number1)).toFixed(2)}`;
-                }
-                else{
-                    if(result == '0'){
-                        return 'Dividir por zero é crime';
-                    }
-                    result = `${(Number(info.number1)  / Number(result) ).toFixed(2)}`;
-                }
-                str = `${info.string.slice(0, info.index_start)}${result}${str.slice(index_b + 1)}`
-            }
-            else{
-                str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
-            }
+            str = `${str.slice(0,index_a)}${result}${str.slice(index_b + 1)}`;
         }
     }while(parentheses_regex.test(str));
     return str;
@@ -211,7 +203,7 @@ function handleNumInput(num, current_input){
         return;
     }
     if(/[0-9]/.test(last_char) && num === '.' && !(/^.*[0-9]+\.[0-9]*$/.test(current_input))){
-        addToDisplay(num, c);
+        addToDisplay(num, current_input);
         return;
     }
     if(!(/\./.test(last_char)) && num === 'a'){
