@@ -44,8 +44,7 @@ function getInfo(str, index){
         info.number1 = `${Number(info.number1) * (-1)}`
         if(info.index_start === 1){
             info.string = str.slice(1);
-        }
-        else{
+        } else{
             info.string = `${str.slice(0,info.index_start - 1)}${str.slice(info.index_start)}`;
         }
         info.index_end--;
@@ -83,8 +82,7 @@ function calculate(str){
         if(/[\/]/.test(op_str[0])){
             if(Number(info.number2) == 0){
                 return 'Error! Divisão por 0';
-            }
-            else{
+            } else{
                  result = (Number(info.number1) / Number(info.number2)).toFixed(2);
             }
         }
@@ -93,8 +91,7 @@ function calculate(str){
         }
         if(Number(info.number1) < 0 && result > 0){
             str = `${str.slice(0, index_start)}+${result}${str.slice(index_end + 1)}`;
-        }
-        else{
+        } else{
             str = `${str.slice(0, index_start)}${result}${str.slice(index_end + 1)}`;
         }
     }
@@ -118,8 +115,7 @@ function calculate(str){
         let result = 0;
         if(/[\+]/.test(op_str[0].slice(1))){
             result = Number(info.number1) + Number(info.number2);
-        }
-        else{
+        } else{
              result = Number(info.number1) - Number(info.number2);
         }
         str = `${str.slice(0, index_start)}${result}${str.slice(index_end + 1)}`;
@@ -159,15 +155,12 @@ function verifyInput(str){
                 return true;
             }
             return false;
-        }
-        else if(  (str.match(/[\(]/g) == null)   &&   (str.match(/[\)]/g) == null )   ){
+        } else if(  (str.match(/[\(]/g) == null)   &&   (str.match(/[\)]/g) == null )   ){
             return true;
-        }
-        else{
+        } else{
             return false;
         } 
-    }
-    else{
+    } else{
         return false;
     }
 }
@@ -179,8 +172,7 @@ function canAddParetheses(num, current_input){
             if(bool){
                 return true;
             }
-        }
-        else{
+        } else{
             if(!(/[\-\+\*\/\(]/.test(last_char))){
                 return true;
             }
@@ -219,33 +211,27 @@ function handleOpInput(op, current_input){
     let last_char = current_input[current_input.length - 1];
     if (/[\+\-\/\*]/g.test(last_char) ||( /[\(]/g.test(last_char) && /[\*\+]/.test(op) ) ){
         messageDisplay(`Separe ${last_char} e ${op}`,900);
-     }
-     else{
+    } else{
         if(/[\/\*]/.test(op)){
             if(current_input === '0' || current_input === ''){
                 messageDisplay('Comece com outra operação', 500);
-            }
-            else{
+            } else{
                 addToDisplay(op);
             }
-        }
-        else{
+        } else{
             setOrConcat(op, current_input);
         }
-     }
+    }
 }
 function handleAction(action, str){
     if(action === 'clear'){
         display.textContent = '0';
-    }
-    else if (action === 'backspace' || action === 'backspace1'){
+    } else if (action === 'backspace' || action === 'backspace1'){
         display.textContent = str.slice(0, str.length - 1);
-    }
-    else{
+    } else{
         if(verifyInput(str)){
             addToDisplay(calculate(simplify(str)), false);
-        }
-        else{
+        } else{
             messageDisplay('Syntax Error',300);
         }
     }
@@ -256,11 +242,9 @@ document.querySelector('#buttons').addEventListener('click', event => {
     let char = event.target.id;
     if(event.target.classList.contains('num')){
         handleNumInput(char, str);
-    }
-    else if(event.target.classList.contains('op')){
+    } else if(event.target.classList.contains('op')){
        handleOpInput(char, str);
-    }
-    else{
+    } else{
         handleAction(event.target.id,str);
     }
 });
